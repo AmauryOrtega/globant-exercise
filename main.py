@@ -2,20 +2,18 @@
 # https://is.gd/create.php?format=jsone&url=www.example.com
 # https://is.gd/create.php?format=json&callback=myfunction&url=www.example.com
 
-import urllib3
+from urllib3 import request
 from urllib3.util.retry import Retry
 from urllib3.exceptions import MaxRetryError
 
 urls = []
 file_to_open = "urls.txt"
 
-print(f"Reading file {file_to_open}")
 with open('urls.txt', 'r', encoding="utf-8") as url_file:
     for line in url_file:
-        print(f"url read: {line}")
-        urls.append(line)
-
-urls = urls*100
+        url = line.rstrip()
+        if not url in urls:
+            urls.append(url)
 
 retry_configuration = Retry(
     status_forcelist=[400, 406, 502, 503],
@@ -25,7 +23,7 @@ retry_configuration = Retry(
 
 for url in urls:
     try:
-        r = urllib3.request(
+        r = request(
             method="GET",
             url="https://is.gd/create.php",
             fields={"format": "json", "url": url},
